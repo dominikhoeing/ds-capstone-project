@@ -49,6 +49,13 @@ This links to your local mlflow, if you want to use a different one, then change
 
 The code in the [config.py](modeling/config.py) will try to read it locally and if the file doesn't exist will look in the env var.. IF that is not set the URI will be empty in your code.
 
+## Brew install
+
+```bash
+brew install hdf5
+brew install graphviz
+```
+
 ## Usage
 
 ### Creating an MLFlow experiment
