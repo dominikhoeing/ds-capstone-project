@@ -1,29 +1,70 @@
-# ds-modeling-pipeline
+# DS-Capstone-Project
 
-Here you find a Skeleton project for building a simple model in a python script or notebook and log the results on MLFlow.
+## Introduction
 
-There are two ways to do it: 
-* In Jupyter Notebooks:
-    We train a simple model in the [jupyter notebook](notebooks/EDA-and-modeling.ipynb), where we select only some features and do minimal cleaning. The hyperparameters of feature engineering and modeling will be logged with MLflow
+This repository contains the capstone project created by Tetyana Samoylenko, Alexander Simakov and Dominik Höing during the last month of the "Data Science & AI Bootcamp" by [neuefische](https://www.neuefische.de/), in Hamburg, Germany between July-September 2024.
 
-* With Python scripts:
-    The [main script](modeling/train.py) will go through exactly the same process as the jupyter notebook and also log the hyperparameters with MLflow
+### The Team
 
-Data used is the [coffee quality dataset](https://github.com/jldbc/coffee-quality-database).
+| Member | Background |
+| ------ | ---------- |
+| Tetyana Samoylenko | Mathematics |
+| Alexander Simakov | Sound Engineering |
+| Dominik Höing | Chemistry/Phsics |
 
-## Requirements:
+## The topic
+
+This project was a challenge posted by DrivenData.org called *Conser-vision Practice Area: Image Classification*. You can find the challenge [here](https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/page/409/).
+
+The project is about **image classification using artificial neural networks**. Researchers in nature reserves make extensive use of photo traps to observe the population of animals. These photo traps work autonomously and usually take a picture, if a motion sensor detects movement in front of the camera. Over the course of a study, reserachers take tens of thousands of images, which they need to sort and label in order to estimate the population of a certain kind of animal. A great introduction to these nature conservation efforts is this 4-minute video posted on YouTube by the NGO Panthera: 
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/3FdoJEVnu4A/0.jpg)](https://www.youtube.com/watch?v=3FdoJEVnu4A&t=12s&ab_channel=Panthera)
+
+*The terms and conditions of the DrivenData.org challenge do not allow us to share the image files in this repository. If you want to look at the images yourself and run our code, you need to sign up for the challenge (for free) and download the files to the data-folder.*
+
+## Our work
+
+### Outline of the project
+
+**The challenge was to build and train a neural network, which can accurately detect the correct animal in photos taken by photo traps in Tai National Park, Ivory Coast.** The data contained a total of **16,500 images** and was provided **with labels** by DrivenData.org. Each image only contained one or no animal.
+
+The labels were:
+1) Antelopes / Duikers
+2) Birds
+3) Blank
+4) Civets / Genets
+5) Hogs
+6) Leopards
+7) Monkeys / Prosimians
+8) Rodents
+
+### Exploring the data
+
+We started out with exploring the data. This contained getting an overview of the label distribution, and information of the images, which included sites where the photos were taken, as well as resolution and color information of the images. You can find a Jupyter Notebook called **EDA.ipynb** we created for exploring the data in the main directory of the repository.
+
+### Building and training a model
+
+Our approach to building and training the best model was to **test several pre-built model architectures, which are commonly used for image classification tasks**, such as ResNet50, VGG16, or InceptionNetV3. In some cases, we used these networks as a **base model and added our own layers on top**. Additionally, there were **several preprocessing steps the images had to go through before training the model**, such as removing time stamps and logos from the images, and additional typical processing for image classification, such as resizing, controling the color channels and data augmentation. We also worked on **improving computing performance** by making use of our GPUs with **cuda**.
+
+To write all of these functions in Python, we used three approaches:
+
+1) Approach *(final version)*: Using **PyTorch** and a separate **self-written-functions file** to create an **all-in-one Jupyter notebook**, which we have used for laoding the data, preprocessing the images, training a model, predicting labels and evaluating the results.
+2) Approach *(intermediate saving)*: Based on **PyTorch** as well, but we **separated** our costum preprocessing of the images from training and evaluating the model. The preprocessed images were saved in between. This saved us some computing time, because we did not need to preprocess the images every time we trained and evaluated a model.
+3) Approach *(tensorflow)*: Since we were trained on TensorFlow during the neuefische bootcamp, we wanted to test how **Tensorflow-pipelines** work. We managed to implement pipelines for training a model, but continued in PyTorch from then on to get more experience in using that library. Hence, this solution is not complete.
+
+The scripts and notebooks we have created can be found in the respective folders of the approaches.
+
+## Setup
+
+**Requirements:**
 
 - pyenv with Python: 3.11.3
 
-### Setup
+Since we were working with different operating systems, we created two separate requirement.txt files, which contain all necessary Python packages for install.
 
-Use the requirements file in this repo to create a new environment.
+### MacOS
 
 ```BASH
-make setup
-
-#or
-
 pyenv local 3.11.3
 python -m venv .venv
 source .venv/bin/activate
@@ -31,89 +72,37 @@ pip install --upgrade pip
 pip install -r requirements_dev_macos.txt
 ```
 
-The `requirements.txt` file contains the libraries needed for deployment.. of model or dashboard .. thus no jupyter or other libs used during development.
-
-The MLFLOW URI should **not be stored on git**, you have two options, to save it locally in the `.mlflow_uri` file:
+### Linux
 
 ```BASH
-echo http://127.0.0.1:5000/ > .mlflow_uri
-```
-
-This will create a local file where the uri is stored which will not be added on github (`.mlflow_uri` is in the `.gitignore` file). Alternatively you can export it as an environment variable with
-
-```bash
-export MLFLOW_URI=http://127.0.0.1:5000/
-```
-
-This links to your local mlflow, if you want to use a different one, then change the set uri.
-
-The code in the [config.py](modeling/config.py) will try to read it locally and if the file doesn't exist will look in the env var.. IF that is not set the URI will be empty in your code.
-
-## Brew install
-
-```bash
-brew install hdf5
-brew install graphviz
-```
-
-## Usage
-
-### Creating an MLFlow experiment
-
-You can do it via the GUI or via [command line](https://www.mlflow.org/docs/latest/tracking.html#managing-experiments-and-runs-with-the-tracking-service-api) if you use the local mlflow:
-
-```bash
-mlflow experiments create --experiment-name 0-template-ds-modeling
-```
-
-Check your local mlflow
-
-```bash
-mlflow ui
-```
-
-and open the link [http://127.0.0.1:5000](http://127.0.0.1:5000)
-
-This will throw an error if the experiment already exists. **Save the experiment name in the [config file](modeling/config.py).**
-
-In order to train the model and store test data in the data folder and the model in models run:
-
-```bash
-#activate env
+pyenv local 3.11.3
+python -m venv .venv
 source .venv/bin/activate
-
-python -m modeling.train
+pip install --upgrade pip
+pip install -r requirements_dev_windows.txt
 ```
 
-In order to test that predict works on a test set you created run:
+### Windows
 
-```bash
-python modeling/predict.py models/linear data/X_test.csv data/y_test.csv
+For `PowerShell` CLI :
+
+```PowerShell
+pyenv local 3.11.3
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install --upgrade pip
+pip install -r requirements_dev_windows.txt
 ```
 
-## About MLFLOW -- delete this when using the template
+For `Git-Bash` CLI :
 
-MLFlow is a tool for tracking ML experiments. You can run it locally or remotely. It stores all the information about experiments in a database.
-And you can see the overview via the GUI or access it via APIs. Sending data to mlflow is done via APIs. And with mlflow you can also store models on S3 where you version them and tag them as production for serving them in production.
-![mlflow workflow](images/0_general_tracking_mlflow.png)
+```BASH
+pyenv local 3.11.3
+python -m venv .venv
+source .venv/Scripts/activate
+pip install --upgrade pip
+pip install -r requirements_dev_windows.txt
+```
 
-### MLFlow GUI
-
-You can group model trainings in experiments. The granularity of what an experiment is up to your usecase. Recommended is to have an experiment per data product, as for all the runs in an experiment you can compare the results.
-![gui](images/1_gui.png)
-
-### Code to send data to MLFlow
-
-In order to send data about your model you need to set the connection information, via the tracking uri and also the experiment name (otherwise the default one is used). One run represents a model, and all the rest is metadata. For example if you want to save train MSE, test MSE and validation MSE you need to name them as 3 different metrics.
-If you are doing CV you can set the tracking as nested.
-![mlflow code](images/2_code.png)
-
-### MLFlow metadata
-
-There is no constraint between runs to have the same metadata tracked. I.e. for one run you can track different tags, different metrics, and different parameters (in cv some parameters might not exist for some runs so this .. makes sense to be flexible).
-
-- tags can be anything you want.. like if you do CV you might want to tag the best model as "best"
-- params are perfect for hypermeters and also for information about the data pipeline you use, if you scaling vs normalization and so on
-- metrics.. should be numeric values as these can get plotted
-
-![mlflow metadata](images/3_metadata.png)
+## License
+MIT License
